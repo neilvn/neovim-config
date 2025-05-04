@@ -11,6 +11,17 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+if type(LAZY_PLUGIN_SPEC) == "table" then
+  table.insert(LAZY_PLUGIN_SPEC, {
+    "supermaven-inc/supermaven-nvim",
+    config = function()
+      require("supermaven-nvim").setup({
+        -- Add your supermaven configuration options here if needed
+      })
+    end,
+  })
+end
+
 require("lazy").setup {
   spec = LAZY_PLUGIN_SPEC,
   install = {

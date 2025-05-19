@@ -136,13 +136,13 @@ function M.config()
     sources = {
       { name = "copilot" },
       { name = "nvim_lsp" },
-      { name = "luasnip" },
-      { name = "cmp_tabnine" },
+      -- { name = "luasnip" },
+      -- { name = "cmp_tabnine" },
       { name = "nvim_lua" },
-      { name = "buffer" },
+      -- { name = "buffer" },
       { name = "path" },
       { name = "calc" },
-      { name = "emoji" },
+      -- { name = "emoji" },
     },
     confirm_opts = {
       behavior = cmp.ConfirmBehavior.Replace,

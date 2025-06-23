@@ -5,7 +5,7 @@ local M = {
     "nvim-lua/plenary.nvim",
   },
   -- lazy = true,
-  cmd = "Telescope",
+  -- cmd = "Telescope",
 }
 
 function M.config()

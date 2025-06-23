@@ -75,6 +75,8 @@ function M.config()
     "bashls",
     "jsonls",
     "yamlls",
+    "nim_langserver",
+    "rust_analyzer"
   }
 
   local default_diagnostic_config = {

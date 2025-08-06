@@ -51,3 +51,5 @@ vim.cmd [[set iskeyword+=-]]
 
 vim.g.netrw_banner = 0
 vim.g.netrw_mouse = 2
+
+vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver50-CursorInsert"

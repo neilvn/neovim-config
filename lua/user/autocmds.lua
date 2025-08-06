@@ -74,3 +74,11 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd({ "Colorscheme" }, {
+  callback = function()
+    vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#388bfd", bg = "NONE" })
+    vim.api.nvim_set_hl(0, "Cursor", { fg = "white", bg = "#f81ce5" })
+    vim.api.nvim_set_hl(0, "lCursor", { fg = "white", bg = "#f81ce5" })
+  end,
+})

@@ -45,3 +45,14 @@ keymap({ "n", "x" }, "k", "gk", opts)
 keymap("n", "<leader>w", ":lua vim.wo.wrap = not vim.wo.wrap<CR>", opts)
 
 vim.api.nvim_set_keymap("t", "<C-;>", "<C-\\><C-n>", opts)
+
+-- Movement remapping: jkl; instead of hjkl
+vim.keymap.set({"n", "v", "x"}, "j", "h", { desc = "Move left" })
+vim.keymap.set({"n", "v", "x"}, "k", "j", { desc = "Move down" })
+vim.keymap.set({"n", "v", "x"}, "l", "k", { desc = "Move up" })
+vim.keymap.set({"n", "v", "x"}, ";", "l", { desc = "Move right" })
+
+-- Remap semicolon's original function to comma
+vim.keymap.set({"n", "v", "x"}, ",", ";", { desc = "Repeat f/F/t/T forward" })
+-- Remap comma's original function to backslash  
+vim.keymap.set({"n", "v", "x"}, "\\", ",", { desc = "Repeat f/F/t/T backward" })

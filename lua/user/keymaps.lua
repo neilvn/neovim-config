@@ -56,3 +56,7 @@ vim.keymap.set({"n", "v", "x"}, ";", "l", { desc = "Move right" })
 vim.keymap.set({"n", "v", "x"}, ",", ";", { desc = "Repeat f/F/t/T forward" })
 -- Remap comma's original function to backslash  
 vim.keymap.set({"n", "v", "x"}, "\\", ",", { desc = "Repeat f/F/t/T backward" })
+
+-- Buffer navigation
+vim.keymap.set('n', 'gn', ':bnext<CR>', { desc = 'Go to next buffer' })
+vim.keymap.set('n', 'gp', ':bprevious<CR>', { desc = 'Go to previous buffer' })

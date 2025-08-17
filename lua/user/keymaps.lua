@@ -60,3 +60,51 @@ vim.keymap.set({"n", "v", "x"}, "\\", ",", { desc = "Repeat f/F/t/T backward" })
 -- Buffer navigation
 vim.keymap.set('n', 'gn', ':bnext<CR>', { desc = 'Go to next buffer' })
 vim.keymap.set('n', 'gp', ':bprevious<CR>', { desc = 'Go to previous buffer' })
+
+-- Remap visual selection to use 'm' instead of 'v' (like Helix)
+keymap("n", "mi", "vi", opts) -- select inner
+keymap("n", "ma", "va", opts) -- select around/outer
+
+-- Common text objects with 'm' prefix
+keymap("n", "miw", "viw", opts) -- select inner word
+keymap("n", "maw", "vaw", opts) -- select around word
+keymap("n", "mi\"", "vi\"", opts) -- select inside double quotes
+keymap("n", "ma\"", "va\"", opts) -- select around double quotes
+keymap("n", "mi'", "vi'", opts) -- select inside single quotes
+keymap("n", "ma'", "va'", opts) -- select around single quotes
+keymap("n", "mi`", "vi`", opts) -- select inside backticks
+keymap("n", "ma`", "va`", opts) -- select around backticks
+keymap("n", "mi(", "vi(", opts) -- select inside parentheses
+keymap("n", "ma(", "va(", opts) -- select around parentheses
+keymap("n", "mi)", "vi)", opts) -- select inside parentheses (alternative)
+keymap("n", "ma)", "va)", opts) -- select around parentheses (alternative)
+keymap("n", "mi[", "vi[", opts) -- select inside brackets
+keymap("n", "ma[", "va[", opts) -- select around brackets
+keymap("n", "mi]", "vi]", opts) -- select inside brackets (alternative)
+keymap("n", "ma]", "va]", opts) -- select around brackets (alternative)
+keymap("n", "mi{", "vi{", opts) -- select inside braces
+keymap("n", "ma{", "va{", opts) -- select around braces
+keymap("n", "mi}", "vi}", opts) -- select inside braces (alternative)
+keymap("n", "ma}", "va}", opts) -- select around braces (alternative)
+keymap("n", "mi<", "vi<", opts) -- select inside angle brackets
+keymap("n", "ma<", "va<", opts) -- select around angle brackets
+keymap("n", "mi>", "vi>", opts) -- select inside angle brackets (alternative)
+keymap("n", "ma>", "va>", opts) -- select around angle brackets (alternative)
+keymap("n", "mit", "vit", opts) -- select inside XML/HTML tag
+keymap("n", "mat", "vat", opts) -- select around XML/HTML tag
+keymap("n", "mip", "vip", opts) -- select inner paragraph
+keymap("n", "map", "vap", opts) -- select around paragraph
+keymap("n", "mis", "vis", opts) -- select inner sentence
+keymap("n", "mas", "vas", opts) -- select around sentence
+
+-- Make t/T/f/F automatically enter visual mode (like Helix)
+keymap("n", "t", "vt", opts) -- select until (exclusive)
+keymap("n", "T", "vT", opts) -- select until backward (exclusive) 
+keymap("n", "f", "vf", opts) -- select to (inclusive)
+keymap("n", "F", "vF", opts) -- select to backward (inclusive)
+
+-- Select to end of line (like Helix's behavior)
+keymap("n", "t<CR>", "v$", opts) -- select to end of line
+
+-- Make h repeat last action (since semicolon is now used for movement)
+keymap("n", "h", ".", opts)

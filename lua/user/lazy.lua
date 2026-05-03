@@ -1,36 +1,51 @@
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
--- In init.lua
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+vim.o.cmdheight = 1
 
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system {
+  vim.fn.system({
     "git",
     "clone",
     "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
     "--branch=stable",
     lazypath,
-  }
+  })
 end
 vim.opt.rtp:prepend(lazypath)
 
-if type(LAZY_PLUGIN_SPEC) == "table" then
-  table.insert(LAZY_PLUGIN_SPEC, {
-    "supermaven-inc/supermaven-nvim",
-    config = function()
-      require("supermaven-nvim").setup({
-        keymaps = {
-          accept_suggestion = "<C-x>",
-          clear_suggestion = "<C-]>",
-        }
-      })
-    end,
-  })
-end
+-- Define plugin spec if not already set
+LAZY_PLUGIN_SPEC = LAZY_PLUGIN_SPEC or {}
 
-require("lazy").setup {
+-- Add Copilot to plugin spec
+table.insert(LAZY_PLUGIN_SPEC, {
+  "github/copilot.vim",
+  config = function()
+    -- Disable default <Tab> mapping so it doesn't conflict with completion plugins
+    vim.g.copilot_no_tab_map = true
+
+    -- Map <C-x> to accept Copilot suggestion
+    vim.api.nvim_set_keymap("i", "<C-x>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+
+    -- Map <C-]> to dismiss the current Copilot suggestion
+    vim.api.nvim_set_keymap("i", "<C-]>", 'copilot#Dismiss()', { silent = true, expr = true })
+
+    -- Optional: disable Copilot for some filetypes
+    vim.g.copilot_filetypes = {
+      markdown = false,
+      help = false,
+    }
+  end,
+})
+
+-- Add MoonScript support to plugin spec
+table.insert(LAZY_PLUGIN_SPEC, {
+  "leafo/moonscript-vim",
+})
+
+require("lazy").setup({
   spec = LAZY_PLUGIN_SPEC,
   install = {
     colorscheme = { "darkplus", "default" },
@@ -42,50 +57,23 @@ require("lazy").setup {
     enabled = true,
     notify = false,
   },
-}
+})
 
--- ADD THIS SECTION FOR FLOATING DIAGNOSTICS
--- Configure diagnostic display
+-- Configure diagnostics (corner diagnostics handles display)
+local icons = require "user.icons"
 vim.diagnostic.config({
-  virtual_text = true, -- Keep the virtual text on the line
-  signs = true,        -- Keep the signs in the gutter
+  virtual_text = false,
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+      [vim.diagnostic.severity.WARN] = icons.diagnostics.Warning,
+      [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+      [vim.diagnostic.severity.INFO] = icons.diagnostics.Information,
+    },
+  },
   underline = true,
   update_in_insert = false,
   severity_sort = true,
-  float = {
-    focusable = false,
-    close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-    border = 'rounded',
-    source = 'always',
-    prefix = ' ',
-    scope = 'cursor',
-  },
 })
 
--- Set updatetime for faster hover response
 vim.opt.updatetime = 300
-
--- Function to show diagnostic float
-local function show_line_diagnostics()
-  local line_diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
-  if #line_diagnostics > 0 then
-    vim.diagnostic.open_float(nil, {
-      focusable = false,
-      close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-      border = 'rounded',
-      source = 'always',
-      prefix = ' ',
-      scope = 'line',
-    })
-  end
-end
-
--- Auto-show diagnostic float on cursor hold
-vim.api.nvim_create_autocmd("CursorHold", {
-  callback = show_line_diagnostics,
-})
-
--- Optional: Also show on CursorHoldI (when in insert mode and paused)
-vim.api.nvim_create_autocmd("CursorHoldI", {
-  callback = show_line_diagnostics,
-})

@@ -1,9 +1,44 @@
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- keymap("n", "<Space>", "", opts)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+-- Extend visual-line selection downward with repeated presses
+local function extend_line_selection()
+  if vim.fn.mode() ~= "V" then
+    vim.cmd("normal! V")
+  else
+    vim.cmd("normal! j")
+  end
+end
+
+-- Optional: extend upward
+local function extend_line_selection_up()
+  if vim.fn.mode() ~= "V" then
+    vim.cmd("normal! V")
+  else
+    vim.cmd("normal! k")
+  end
+end
+
+-- Diagnostics toggle with space-d
+vim.keymap.set("n", "<leader>d", function()
+  vim.cmd("Trouble diagnostics toggle filter.buf=0 focus=true")
+end, { noremap = true, silent = true, desc = "Toggle Trouble buffer diagnostics and focus" })
+
+-- Create :bco command to close all buffers except the current one
+vim.api.nvim_create_user_command("Bco", function()
+  local current_buf = vim.api.nvim_get_current_buf()
+  local buffers = vim.api.nvim_list_bufs()
+
+  for _, buf in ipairs(buffers) do
+    if vim.api.nvim_buf_is_loaded(buf) and buf ~= current_buf then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+end, { desc = "Close all buffers except current one" })
+
 
 keymap("n", "<C-i>", "<C-i>", opts)
 
@@ -61,6 +96,13 @@ vim.keymap.set({"n", "v", "x"}, "\\", ",", { desc = "Repeat f/F/t/T backward" })
 vim.keymap.set('n', 'gn', ':bnext<CR>', { desc = 'Go to next buffer' })
 vim.keymap.set('n', 'gp', ':bprevious<CR>', { desc = 'Go to previous buffer' })
 
+-- Close current buffer but keep window open
+vim.keymap.set("n", "<leader>c", ":bprevious | bdelete #<CR>", { desc = "Close buffer" })
+
+-- Helix-style line selection
+vim.keymap.set({"n", "v"}, "x", extend_line_selection, { noremap = true, silent = true, desc = "Select current line / extend selection" })
+vim.keymap.set({"n", "v"}, "X", extend_line_selection_up, { noremap = true, silent = true, desc = "Extend selection upward" })
+
 -- Remap visual selection to use 'm' instead of 'v' (like Helix)
 keymap("n", "mi", "vi", opts) -- select inner
 keymap("n", "ma", "va", opts) -- select around/outer
@@ -108,3 +150,18 @@ keymap("n", "t<CR>", "v$", opts) -- select to end of line
 
 -- Make h repeat last action (since semicolon is now used for movement)
 keymap("n", "h", ".", opts)
+
+keymap({"n", "v"}, "<leader>Y", '"+y', opts) -- Copy to system clipboard
+keymap({"n", "v"}, "<leader>P", '"+p', opts) -- Paste from system clipboard
+
+-- Make d behave like x (delete character under cursor)
+keymap("n", "d", "x", opts)
+
+-- Start multicursor with visual selection (like Helix s)
+keymap("v", "s", "<cmd>MCvisual<CR>", opts)
+
+-- 't' followed by Enter: select from cursor to end of line, exclusive
+keymap("n", "t<CR>", "v$h", opts)
+
+-- Go to matching bracket/paren/brace
+keymap({"n", "v"}, "mm", "%", opts)

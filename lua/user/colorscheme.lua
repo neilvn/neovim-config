@@ -1,20 +1,30 @@
 local M = {
+  -- Main theme
   "LunarVim/darkplus.nvim",
-  lazy = false, -- make sure we load this during startup if it is your main colorscheme
-  priority = 1000, -- make sure to load this before all the other start plugins
+  lazy = false, -- load during startup
+  priority = 1000, -- load before everything else
 }
 
 function M.config()
-  vim.cmd.colorscheme "darkplus"
+  -- pick one of these:
+  -- vim.cmd.colorscheme "darkplus"
+  vim.cmd.colorscheme "onenord"
+  -- vim.cmd.colorscheme "onedark"
+  
 
+  -- Optional: make backgrounds transparent
   vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
   vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
   vim.api.nvim_set_hl(0, "NormalNC", { bg = "NONE" })
-  
-  -- Optional: Also make line numbers background transparent
   vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
   vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
   vim.api.nvim_set_hl(0, "FoldColumn", { bg = "NONE" })
 end
+
+-- Add extra themes here
+M.dependencies = {
+  { "rmehri01/onenord.nvim" },
+  { "joshdick/onedark.vim" },
+}
 
 return M

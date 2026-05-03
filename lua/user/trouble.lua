@@ -30,9 +30,17 @@ function M.config()
   }
   
   -- Aggressively disable all virtual text and inline diagnostics
+  local icons = require "user.icons"
   vim.diagnostic.config({
     virtual_text = false,
-    signs = true,
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+        [vim.diagnostic.severity.WARN] = icons.diagnostics.Warning,
+        [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+        [vim.diagnostic.severity.INFO] = icons.diagnostics.Information,
+      },
+    },
     underline = true,
     update_in_insert = false,
     severity_sort = true,

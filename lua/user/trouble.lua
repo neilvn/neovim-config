@@ -46,17 +46,7 @@ function M.config()
     severity_sort = true,
     float = false,
   })
-  
-  -- Override LSP handlers to disable virtual text
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-    vim.lsp.diagnostic.on_publish_diagnostics, {
-      virtual_text = false,
-      signs = true,
-      underline = true,
-      update_in_insert = false,
-    }
-  )
-  
+
   -- Disable virtual text for all namespaces, especially null-ls
   vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(ev)

@@ -2,6 +2,7 @@ require "user.launch"
 require "user.options"
 require "user.keymaps"
 require "user.autocmds"
+require("user.commands").config()
 require("user.diagnostics-corner").setup()
 spec "user.colorscheme"
 spec "user.devicons"

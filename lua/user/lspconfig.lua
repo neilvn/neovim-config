@@ -14,6 +14,7 @@ local function lsp_keymaps(bufnr)
   keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
   keymap(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+  vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, { buffer = bufnr, silent = true, desc = "Hover Documentation" })
   keymap(bufnr, "n", "gI", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
   keymap(bufnr, "n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
   -- gl disabled - using corner diagnostics instead
@@ -35,10 +36,6 @@ M.on_attach = function(client, bufnr)
   end
   
   lsp_keymaps(bufnr)
-
-  if client.supports_method "textDocument/inlayHint" then
-    vim.lsp.inlay_hint.enable(true, { bufnr })
-  end
 end
 
 function M.common_capabilities()
@@ -53,24 +50,6 @@ M.toggle_inlay_hints = function()
 end
 
 function M.config()
-  -- Prevent multiple config runs with better locking
-  if _G.lspconfig_loaded then
-    vim.notify("LSP config already loaded, skipping", vim.log.levels.WARN)
-    return
-  end
-  
-  -- Set the flag immediately to prevent race conditions
-  _G.lspconfig_loaded = true
-  
-  -- Add a small delay to ensure no duplicate calls
-  vim.defer_fn(function()
-    -- Double-check after delay
-    if _G.lspconfig_setup_complete then
-      return
-    end
-    _G.lspconfig_setup_complete = true
-  end, 10)
-  
   local wk = require "which-key"
   wk.add {
     { "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>", desc = "Code Action" },
@@ -93,7 +72,6 @@ function M.config()
     { "<leader>laa", "<cmd>lua vim.lsp.buf.code_action()<cr>", desc = "Code Action", mode = "v" },
   }
 
-  local lspconfig = require "lspconfig"
   local icons = require "user.icons"
 
   -- Define diagnostic signs using the legacy method (more reliable)
@@ -151,11 +129,14 @@ function M.config()
   vim.api.nvim_set_hl(0, "FloatBorder", { fg = "white", bg = "NONE" })
 
   -- Enhanced hover handler with proper syntax highlighting
-  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(function(_, result, ctx, config)
-    config = config or {}
-    config.border = config.border or "rounded"
-    config.max_width = config.max_width or 80
-    config.max_height = config.max_height or 20
+  vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
+    config = vim.tbl_extend("keep", config or {}, {
+      border = "rounded",
+      max_width = 80,
+      max_height = 20,
+      focusable = true,
+      focus_id = "textDocument/hover",
+    })
     
     if not (result and result.contents) then
       return
@@ -180,13 +161,7 @@ function M.config()
         
         -- Enable syntax highlighting
         vim.cmd("syntax enable")
-        
-        -- Try to enable treesitter highlighting if available
-        local has_ts, ts_highlight = pcall(require, "nvim-treesitter.highlight")
-        if has_ts then
-          ts_highlight.attach(bufnr, "markdown")
-        end
-        
+
         -- Set conceallevel for better markdown rendering
         vim.wo[winnr].conceallevel = 2
         vim.wo[winnr].concealcursor = "n"
@@ -197,40 +172,22 @@ function M.config()
     end
     
     return bufnr, winnr
-  end, {
-    border = "rounded",
-    max_width = 80,
-    max_height = 20,
-    focusable = true,
-    focus_id = "textDocument/hover",
-  })
+  end
 
   -- Signature help handler with border
-  vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { 
-    border = "rounded",
-    focusable = false,
-    focus_id = "textDocument/signatureHelp",
-  })
+  vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
+    config = vim.tbl_extend("keep", config or {}, {
+      border = "rounded",
+      focusable = false,
+      focus_id = "textDocument/signatureHelp",
+    })
+    return vim.lsp.handlers.signature_help(err, result, ctx, config)
+  end
   
   -- Set rounded borders for all LSP windows
   require("lspconfig.ui.windows").default_options.border = "rounded"
 
-  -- Prevent duplicate server setups with better tracking
-  local setup_servers = {}
-  
-  -- Check for already running clients before setup
-  local function is_client_active(name)
-    local clients = vim.lsp.get_clients({ name = name })
-    return #clients > 0
-  end
-  
-  for _, server in pairs(servers) do
-    -- Skip if server is already set up or running
-    if setup_servers[server] or is_client_active(server) then
-      vim.notify("Skipping duplicate setup for " .. server, vim.log.levels.DEBUG)
-      goto continue
-    end
-    
+  for _, server in ipairs(servers) do
     local opts = {
       on_attach = M.on_attach,
       capabilities = M.common_capabilities(),
@@ -238,27 +195,17 @@ function M.config()
 
     local require_ok, settings = pcall(require, "user.lspsettings." .. server)
     if require_ok then
-      opts = vim.tbl_deep_extend("force", settings, opts)
+      opts = vim.tbl_deep_extend("force", opts, settings)
     end
 
     if server == "lua_ls" then
       require("neodev").setup {}
     end
 
-    -- Debug logging for ts_ls
-    if server == "ts_ls" then
-      vim.notify("Setting up ts_ls from lspconfig", vim.log.levels.INFO)
-      -- Print stack trace to see where this is being called from
-      if vim.env.DEBUG_LSP then
-        print(debug.traceback("ts_ls setup called from:", 2))
-      end
-    end
-
-    lspconfig[server].setup(opts)
-    setup_servers[server] = true
-    
-    ::continue::
+    vim.lsp.config(server, opts)
   end
+
+  vim.lsp.enable(servers)
 end
 
 return M
